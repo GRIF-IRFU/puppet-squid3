@@ -1,0 +1,905 @@
+#	WELCOME TO SQUID 
+#	----------------------------
+# This is the Squid configuration file
+# for the FAQ and other documentation : http://www.squid-cache.org/
+#
+# Do not edit - it is managed by Puppet
+#
+
+# OPTIONS FOR AUTHENTICATION
+# -----------------------------------------------------------------------------
+#  TAG: auth_param
+# Default: none
+#  TAG: authenticate_cache_garbage_interval
+# Default: authenticate_cache_garbage_interval 1 hour
+#  TAG: authenticate_ttl
+# Default: authenticate_ttl 1 hour
+#  TAG: authenticate_ip_ttl
+# Default: authenticate_ip_ttl 0 seconds
+
+# ACCESS CONTROLS
+# -----------------------------------------------------------------------------
+#  TAG: external_acl_type
+# Default: none
+#  TAG: acl
+# Default: acl all src all
+
+acl manager proto cache_object
+acl localhost src 127.0.0.1/32 ::1
+acl localnet src 10.0.0.0/8	    # RFC1918 possible internal network
+acl localnet src 172.16.0.0/12	# RFC1918 possible internal network
+acl localnet src 192.168.0.0/16	# RFC1918 possible internal network
+
+acl SSL_ports port 443
+acl Safe_ports port 80			# http
+acl Safe_ports port 21			# ftp
+acl Safe_ports port 443			# https
+acl Safe_ports port 70			# gopher
+acl Safe_ports port 210			# wais
+acl Safe_ports port 1025-65535	# unregistered ports
+acl Safe_ports port 280			# http-mgmt
+acl Safe_ports port 488			# gss-http
+acl Safe_ports port 591			# filemaker
+acl Safe_ports port 777			# multiling http
+acl CONNECT method CONNECT
+
+## ADD MORE ##
+<% @acl.each do |line| -%>
+acl <%= line %>
+<% end -%>
+
+#  TAG: follow_x_forwarded_for
+# Default: follow_x_forwarded_for deny all
+#  TAG: acl_uses_indirect_client	on|off
+# Default: acl_uses_indirect_client on
+#  TAG: delay_pool_uses_indirect_client	on|off
+# Default: delay_pool_uses_indirect_client on
+#  TAG: log_uses_indirect_client	on|off
+# Default: log_uses_indirect_client on
+
+#  TAG: http_access
+# Default: http_access deny all
+
+http_access allow manager localhost
+http_access deny manager
+http_access deny !Safe_ports
+http_access deny CONNECT !SSL_ports
+
+## ADD MORE ##
+<% @http_access.each do |line| -%>
+http_access <%= line %>
+<% end -%>
+
+http_access allow localnet
+http_access allow localhost
+http_access deny all
+
+#  TAG: adapted_http_access
+# Default: none
+
+#  TAG: http_reply_access
+# Default: none
+
+#  TAG: icp_access
+# Default: icp_access deny all
+
+## ADD MORE ##
+<% @icp_access.each do |line| -%>
+icp_access <%= line %>
+<% end -%>
+
+#  TAG: htcp_access
+# Default: htcp_access deny all
+#  TAG: htcp_clr_access
+# Default: htcp_clr_access deny all
+# Default: miss_access allow all
+#  TAG: ident_lookup_access
+# Default: ident_lookup_access deny all
+#  TAG: reply_body_max_size	size [acl acl...]
+#  TAG: miss_access
+# Default: none
+
+# NETWORK OPTIONS
+# -----------------------------------------------------------------------------
+#  TAG: http_port
+# Default: http_port 3128
+
+## ADD MORE ##
+<% @http_port.each do |line| -%>
+http_port <%= line %>
+<% end -%>
+
+#  TAG: https_port
+# Default: none
+#  TAG: tcp_outgoing_tos
+# Default: none
+#  TAG: clientside_tos
+# Default: none
+#  TAG: qos_flows
+# Default: none
+
+#  TAG: tcp_outgoing_address
+# Default: none
+
+## ADD MORE ##
+<% @tcp_outgoing_address.each do |line| -%>
+tcp_outgoing_address <%= line %>
+<% end -%>
+
+# SSL OPTIONS
+# -----------------------------------------------------------------------------
+#  TAG: ssl_unclean_shutdown
+# Default: ssl_unclean_shutdown off
+#  TAG: ssl_engine
+# Default: none
+#  TAG: sslproxy_client_certificate
+# Default: none
+#  TAG: sslproxy_client_key
+# Default: none
+#  TAG: sslproxy_version
+# Default: sslproxy_version 1
+#  TAG: sslproxy_options
+# Default: none
+#  TAG: sslproxy_cipher
+# Default: none
+#  TAG: sslproxy_cafile
+# Default: none
+#  TAG: sslproxy_capath
+# Default: none
+#  TAG: ssl_bump
+# Default: none
+#  TAG: sslproxy_flags
+# Default: none
+#  TAG: sslproxy_cert_error
+# Default: none
+#  TAG: sslpassword_program
+# Default: none
+
+# OPTIONS WHICH AFFECT THE NEIGHBOR SELECTION ALGORITHM
+# -----------------------------------------------------------------------------
+#  TAG: cache_peer
+# Default: none
+#  TAG: cache_peer_domain
+# Default: none
+#  TAG: cache_peer_access
+# Default: none
+#  TAG: neighbor_type_domain
+# Default: none
+#  TAG: dead_peer_timeout	(seconds)
+# Default: dead_peer_timeout 10 seconds
+#  TAG: forward_max_tries
+# Default: forward_max_tries 10
+#  TAG: hierarchy_stoplist 
+
+hierarchy_stoplist cgi-bin ?
+
+# MEMORY CACHE OPTIONS
+# -----------------------------------------------------------------------------
+#  TAG: cache_mem	(bytes)
+# Default: cache_mem 256 MB
+
+## ADD MORE ##
+<% if @cache_mem != "256 MB" -%>
+cache_mem <%= @cache_mem %>
+<% end -%>
+
+#  TAG: maximum_object_size_in_memory	(bytes)
+# Default: maximum_object_size_in_memory 512 KB
+
+## ADD MORE ##
+<% if @maximum_object_size_in_memory != "512 KB" -%>
+maximum_object_size_in_memory <%= @maximum_object_size_in_memory %>
+<% end -%>
+
+#  TAG: memory_replacement_policy
+# Default: memory_replacement_policy lru
+
+## ADD MORE ##
+<% @memory_replacement_policy.each do |line| -%>
+memory_replacement_policy <%= @memory_replacement_policy %>
+<% end -%>
+
+# DISK CACHE OPTIONS
+# -----------------------------------------------------------------------------
+#  TAG: cache_replacement_policy
+# Default: cache_replacement_policy lru
+
+## ADD MORE ##
+<% @cache_replacement_policy.each do |line| -%>
+cache_replacement_policy <%= @cache_replacement_policy %>
+<% end -%>
+
+#  TAG: cache_dir
+# Default: cache_dir ufs /var/spool/squid 100 16 256
+
+## ADD MORE ##
+<% @cache_dir.each do |line| -%>
+cache_dir <%= line %>
+<% end -%>
+
+#  TAG: store_dir_select_algorithm
+# Default: store_dir_select_algorithm least-load
+#  TAG: max_open_disk_fds
+# Default: max_open_disk_fds 0
+#  TAG: minimum_object_size	(bytes)
+# Default: minimum_object_size 0 KB
+
+#  TAG: maximum_object_size	(bytes)
+# Default: maximum_object_size 4096 KB
+
+## ADD MORE ##
+<% if @maximum_object_size != "4096 KB" -%>
+maximum_object_size <%= @maximum_object_size %>
+<% end -%>
+
+#  TAG: cache_swap_low	(percent, 0-100)
+# Default: cache_swap_low 90
+#  TAG: cache_swap_high	(percent, 0-100)
+# Default: cache_swap_high 95
+
+# LOGFILE OPTIONS
+# -----------------------------------------------------------------------------
+#  TAG: logformat
+# Default: none
+
+#  TAG: access_log
+# Default: access_log /var/log/squid/access.log squid
+
+## ADD MORE ##
+<% @access_log.each do |line| -%>
+access_log <%= line %>
+<% end -%>
+
+#  TAG: icap_log
+# Default: none
+
+#  TAG: log_access	allow|deny acl acl...
+# Default: none
+#  TAG: log_icap
+# Default: none
+
+#  TAG: cache_store_log
+# Default: none
+
+## ADD MORE ##
+<% if @cache_store_log != "/var/log/squid/store.log" -%>
+cache_store_log <%= @cache_store_log %>
+<% end -%>
+
+
+#  TAG: cache_swap_state
+# Default: none
+#  TAG: logfile_rotate
+# Default: logfile_rotate 0 
+#  TAG: emulate_httpd_log	on|off
+# Default: emulate_httpd_log off
+#  TAG: log_ip_on_direct	on|off
+# Default: log_ip_on_direct on
+#  TAG: mime_table
+# Default: mime_table /etc/squid/mime.conf
+#  TAG: log_mime_hdrs	on|off
+# Default: log_mime_hdrs off
+#  TAG: useragent_log
+# Default: none
+#  TAG: referer_log
+# Default: none
+#  TAG: pid_filename
+# Default: pid_filename /var/run/squid.pid
+#  TAG: log_fqdn	on|off
+# Default: log_fqdn off
+#  TAG: client_netmask
+# Default: client_netmask no_addr
+#  TAG: forward_log
+# Default: none
+
+#  TAG: strip_query_terms
+# Default: strip_query_terms on
+
+## ADD MORE ##
+<% if @strip_query_terms != "on" -%>
+strip_query_terms <%= @strip_query_terms %>
+<% end -%>
+
+#  TAG: buffered_logs	on|off
+# Default: buffered_logs off
+#  TAG: netdb_filename
+# Default: netdb_filename /var/log/squid/netdb.state
+
+# OPTIONS FOR TROUBLESHOOTING
+# -----------------------------------------------------------------------------
+#  TAG: cache_log
+# Default: cache_log /var/log/squid/cache.log
+
+## ADD MORE ##
+<% if @cache_log != "/var/log/squid/cache.log" -%>
+cache_log <%= @cache_log %>
+<% end -%>
+
+#  TAG: debug_options
+# Default: debug_options ALL,1
+#  TAG: coredump_dir
+# Default: coredump_dir none
+# Leave coredumps in the first cache dir
+
+## ADD MORE ##
+<% if @cache_dir[0] != "none" -%>
+coredump_dir <%= cache_dir[0] %>
+<% end -%>
+
+# OPTIONS FOR FTP GATEWAYING
+# -----------------------------------------------------------------------------
+#  TAG: ftp_user
+# Default: ftp_user Squid@
+#  TAG: ftp_list_width
+# Default: ftp_list_width 32
+#  TAG: ftp_passive
+# Default: ftp_passive on
+#  TAG: ftp_epsv_all
+# Default: ftp_epsv_all off
+#  TAG: ftp_epsv
+# Default: ftp_epsv on
+#  TAG: ftp_sanitycheck
+# Default: ftp_sanitycheck on
+#  TAG: ftp_telnet_protocol
+# Default: ftp_telnet_protocol on
+
+# OPTIONS FOR EXTERNAL SUPPORT PROGRAMS
+# -----------------------------------------------------------------------------
+#  TAG: diskd_program
+# Default: diskd_program /usr/lib64/squid/diskd
+#  TAG: unlinkd_program
+# Default: unlinkd_program /usr/lib64/squid/unlinkd
+#  TAG: pinger_program
+# Default: pinger_program /usr/lib64/squid/pinger
+#  TAG: pinger_enable
+# Default: pinger_enable off
+
+# OPTIONS FOR URL REWRITING
+# -----------------------------------------------------------------------------
+#  TAG: url_rewrite_program
+# Default: none
+#  TAG: url_rewrite_children
+# Default: url_rewrite_children 5
+#  TAG: url_rewrite_concurrency
+# Default: url_rewrite_concurrency 0
+#  TAG: url_rewrite_host_header
+# Default: url_rewrite_host_header on
+#  TAG: url_rewrite_access
+# Default: none
+#  TAG: url_rewrite_bypass
+# Default: url_rewrite_bypass off
+
+# OPTIONS FOR TUNING THE CACHE
+# -----------------------------------------------------------------------------
+#  TAG: cache
+# Default: none
+
+## ADD MORE##
+<% @cache.each do |line| -%>
+cache <%= line %>
+<% end -%>
+
+#  TAG: refresh_pattern
+# Add any of your own refresh_pattern entries above these.
+
+refresh_pattern ^ftp:		1440	20%	10080
+refresh_pattern ^gopher:	1440	0%	1440
+refresh_pattern -i (/cgi-bin/|\?) 0	0%	0
+refresh_pattern .		0	20%	4320
+
+#  TAG: quick_abort_min	(KB)
+#  TAG: quick_abort_max	(KB)
+#  TAG: quick_abort_pct	(percent)
+# Default: quick_abort_min 16 KB
+# Default: quick_abort_max 16 KB
+# Default: quick_abort_pct 95
+#  TAG: read_ahead_gap	buffer-size
+# Default: read_ahead_gap 16 KB
+#  TAG: negative_ttl	time-units
+# Default: negative_ttl 0 seconds
+#  TAG: positive_dns_ttl	time-units
+# Default: positive_dns_ttl 6 hours
+#  TAG: negative_dns_ttl	time-units
+# Default: negative_dns_ttl 1 minutes
+
+#  TAG: range_offset_limit	(bytes)
+# Default: range_offset_limit 0 KB
+#  TAG: minimum_expiry_time	(seconds)
+# Default: minimum_expiry_time 60 seconds
+#  TAG: store_avg_object_size	(kbytes)
+# Default: store_avg_object_size 13 KB
+#  TAG: store_objects_per_bucket
+# Default: store_objects_per_bucket 20
+
+# HTTP OPTIONS
+# -----------------------------------------------------------------------------
+#  TAG: request_header_max_size	(KB)
+# Default: request_header_max_size 64 KB
+#  TAG: reply_header_max_size	(KB)
+# Default: reply_header_max_size 64 KB
+#  TAG: request_body_max_size	(bytes)
+# Default: request_body_max_size 0 KB
+#  TAG: chunked_request_body_max_size	(bytes)
+# Default: chunked_request_body_max_size 64 KB
+#  TAG: broken_posts
+# Default: none
+#  TAG: icap_uses_indirect_client	on|off
+# Default: icap_uses_indirect_client on
+
+#  TAG: via	on|off
+# Default: via on
+
+## ADD MORE ##
+<% if @via != "on" -%>
+via <%= @via %>
+<% end -%>
+
+#  TAG: ie_refresh	on|off
+# Default: ie_refresh off
+#  TAG: vary_ignore_expire	on|off
+# Default: vary_ignore_expire off
+#  TAG: request_entities
+# Default: request_entities off
+#  TAG: request_header_access
+# Default: none
+#  TAG: reply_header_access
+# Default: none
+#  TAG: header_replace
+# Default: none
+#  TAG: relaxed_header_parser	on|off|warn
+# Default: relaxed_header_parser on
+
+#  TAG: ignore_expect_100	on|off
+# Default: ignore_expect_100 off
+
+## ADD MORE ##
+<% if @ignore_expect_100 != "off" -%>
+ignore_expect_100 <%= @ignore_expect_100 %>
+<% end -%>
+
+# TIMEOUTS
+# -----------------------------------------------------------------------------
+#  TAG: forward_timeout	time-units
+# Default: forward_timeout 4 minutes
+#  TAG: connect_timeout	time-units
+# Default: connect_timeout 1 minute
+#  TAG: peer_connect_timeout	time-units
+# Default: peer_connect_timeout 30 seconds
+#  TAG: read_timeout	time-units
+# Default: read_timeout 15 minutes
+#  TAG: request_timeout
+# Default: request_timeout 5 minutes
+#  TAG: persistent_request_timeout
+# Default: persistent_request_timeout 2 minutes
+#  TAG: client_lifetime	time-units
+# Default: client_lifetime 1 day
+#  TAG: half_closed_clients
+# Default: half_closed_clients off
+#  TAG: pconn_timeout
+# Default: pconn_timeout 1 minute
+#  TAG: ident_timeout
+# Default: ident_timeout 10 seconds
+#  TAG: shutdown_lifetime	time-units
+# Default: shutdown_lifetime 30 seconds
+
+# ADMINISTRATIVE PARAMETERS
+# -----------------------------------------------------------------------------
+#  TAG: cache_mgr
+# Default: cache_mgr root
+
+## ADD MORE ## 
+<% if @cache_mgr != "root" -%>
+cache_mgr <%= @cache_mgr %>
+<% end -%>
+
+#  TAG: mail_from
+# Default: none
+#  TAG: mail_program
+# Default: mail_program mail
+#  TAG: cache_effective_user
+# Default: cache_effective_user squid
+#  TAG: cache_effective_group
+# Default: none
+#  TAG: httpd_suppress_version_string	on|off
+# Default: httpd_suppress_version_string off
+#  TAG: visible_hostname
+# Default: none
+#  TAG: unique_hostname
+# Default: none
+#  TAG: hostname_aliases
+# Default: none
+#  TAG: umask
+# Default: umask 027
+
+# OPTIONS FOR THE CACHE REGISTRATION SERVICE
+# -----------------------------------------------------------------------------
+#  TAG: announce_period
+# Default: announce_period 0
+#  TAG: announce_host
+#  TAG: announce_file
+#  TAG: announce_port
+# Default: announce_host tracker.ircache.net
+# Default: announce_port 3131
+
+# HTTPD-ACCELERATOR OPTIONS
+# -----------------------------------------------------------------------------
+#  TAG: httpd_accel_surrogate_id
+# Default: httpd_accel_surrogate_id unset-id
+#  TAG: http_accel_surrogate_remote	on|off
+# Default: http_accel_surrogate_remote off
+#  TAG: esi_parser	libxml2|expat|custom
+# Default: esi_parser custom
+
+# DELAY POOL PARAMETERS
+# -----------------------------------------------------------------------------
+#  TAG: delay_pools
+# Default: delay_pools 0
+#  TAG: delay_class
+# Default: none
+#  TAG: delay_access
+# Default: none
+#  TAG: delay_parameters
+# Default: none
+#  TAG: delay_initial_bucket_level	(percent, 0-100)
+# Default: delay_initial_bucket_level 50
+
+# WCCPv1 AND WCCPv2 CONFIGURATION OPTIONS
+# -----------------------------------------------------------------------------
+#  TAG: wccp_router
+# Default: wccp_router any_addr
+#  TAG: wccp2_router
+# Default: none
+#  TAG: wccp_version
+# Default: wccp_version 4
+#  TAG: wccp2_rebuild_wait
+# Default: wccp2_rebuild_wait on
+#  TAG: wccp2_forwarding_method
+# Default: wccp2_forwarding_method gre
+#  TAG: wccp2_return_method
+# Default: wccp2_return_method gre
+#  TAG: wccp2_assignment_method
+# Default: wccp2_assignment_method hash
+#  TAG: wccp2_service
+# Default: wccp2_service standard 0
+#  TAG: wccp2_service_info
+# Default: none
+#  TAG: wccp2_weight
+# Default: wccp2_weight 10000
+#  TAG: wccp_address
+#  TAG: wccp2_address
+# Default: wccp_address 0.0.0.0
+# Default: wccp2_address 0.0.0.0
+
+# PERSISTENT CONNECTION HANDLING
+# -----------------------------------------------------------------------------
+#  TAG: client_persistent_connections
+# Default: client_persistent_connections on
+
+## ADD MORE ##
+<% if @client_persistent_connections != 'on' -%>
+client_persistent_connections <%= @client_persistent_connections %>
+<% end -%>
+
+#  TAG: server_persistent_connections
+# Default: server_persistent_connections on
+
+## ADD MORE ##
+<% if @server_persistent_connections != 'on' -%>
+server_persistent_connections <%= @server_persistent_connections %>
+<% end -%>
+
+#  TAG: persistent_connection_after_error
+# Default: persistent_connection_after_error on
+#  TAG: detect_broken_pconn
+# Default: detect_broken_pconn off
+
+# CACHE DIGEST OPTIONS
+# -----------------------------------------------------------------------------
+#  TAG: digest_generation
+# Default: digest_generation on
+#  TAG: digest_bits_per_entry
+# Default: digest_bits_per_entry 5
+#  TAG: digest_rebuild_period	(seconds)
+# Default: digest_rebuild_period 1 hour
+#  TAG: digest_rewrite_period	(seconds)
+# Default: digest_rewrite_period 1 hour
+#  TAG: digest_swapout_chunk_size	(bytes)
+# Default: digest_swapout_chunk_size 4096 bytes
+#  TAG: digest_rebuild_chunk_percentage	(percent, 0-100)
+# Default: digest_rebuild_chunk_percentage 10
+
+# SNMP OPTIONS
+# -----------------------------------------------------------------------------
+#  TAG: snmp_port
+# Default: snmp_port 0
+
+## ADD MORE ##
+<% @snmp_port .each do |line| -%>
+snmp_port  <%= line %>
+<% end -%>
+
+#  TAG: snmp_access
+# Default: snmp_access deny all
+
+## ADD MORE ##
+<% @snmp_access .each do |line| -%>
+snmp_access  <%= line %>
+<% end -%>
+
+#  TAG: snmp_incoming_address
+#  TAG: snmp_outgoing_address
+# Default: snmp_incoming_address any_addr
+# Default: snmp_outgoing_address no_addr
+
+# ICP OPTIONS
+# -----------------------------------------------------------------------------
+#  TAG: icp_port
+# Default: icp_port 0
+#  TAG: htcp_port
+# Default: htcp_port 0
+#  TAG: log_icp_queries	on|off
+# Default: log_icp_queries on
+#  TAG: udp_incoming_address
+# Default: udp_incoming_address any_addr
+#  TAG: udp_outgoing_address
+# Default: udp_outgoing_address no_addr
+#  TAG: icp_hit_stale	on|off
+# Default: icp_hit_stale off
+#  TAG: minimum_direct_hops
+# Default: minimum_direct_hops 4
+#  TAG: minimum_direct_rtt
+# Default: minimum_direct_rtt 400
+#  TAG: netdb_low
+#  TAG: netdb_high
+# Default: netdb_low 900
+# Default: netdb_high 1000
+#  TAG: netdb_ping_period
+# Default: netdb_ping_period 5 minutes
+#  TAG: query_icmp	on|off
+# Default: query_icmp off
+#  TAG: test_reachability	on|off
+# Default: test_reachability off
+#  TAG: icp_query_timeout	(msec)
+# Default: icp_query_timeout 0
+#  TAG: maximum_icp_query_timeout	(msec)
+# Default: maximum_icp_query_timeout 2000
+#  TAG: minimum_icp_query_timeout	(msec)
+# Default: minimum_icp_query_timeout 5
+#  TAG: background_ping_rate	time-units
+# Default: background_ping_rate 10 seconds
+
+# MULTICAST ICP OPTIONS
+# -----------------------------------------------------------------------------
+#  TAG: mcast_groups
+# Default: none
+#  TAG: mcast_miss_addr
+# Default: mcast_miss_addr no_addr
+#  TAG: mcast_miss_ttl
+# Default: mcast_miss_ttl 16
+#  TAG: mcast_miss_port
+# Default: mcast_miss_port 3135
+#  TAG: mcast_miss_encode_key
+# Default: mcast_miss_encode_key XXXXXXXXXXXXXXXX
+#  TAG: mcast_icp_query_timeout	(msec)
+# Default:# mcast_icp_query_timeout 2000
+
+# INTERNAL ICON OPTIONS
+# -----------------------------------------------------------------------------
+#  TAG: icon_directory
+# Default: icon_directory /usr/share/squid/icons
+#  TAG: global_internal_static
+# Default: global_internal_static on
+#  TAG: short_icon_urls
+# Default: short_icon_urls on
+
+# ERROR PAGE OPTIONS
+# -----------------------------------------------------------------------------
+#  TAG: error_directory
+# Default: none
+#  TAG: error_default_language
+# Default: none
+#  TAG: error_log_languages
+# Default: error_log_languages on
+#  TAG: err_page_stylesheet
+# Default: err_page_stylesheet /etc/squid/errorpage.css
+#  TAG: err_html_text
+# Default: none
+#  TAG: email_err_data	on|off
+# Default: email_err_data on
+#  TAG: deny_info
+# Default: none
+
+# OPTIONS INFLUENCING REQUEST FORWARDING 
+# -----------------------------------------------------------------------------
+#  TAG: nonhierarchical_direct
+# Default: nonhierarchical_direct on
+#  TAG: prefer_direct
+# Default: prefer_direct off
+#  TAG: always_direct
+# Default: none
+#  TAG: never_direct
+# Default: none
+
+# ADVANCED NETWORKING OPTIONS
+# -----------------------------------------------------------------------------
+
+#  TAG: incoming_icp_average
+#  TAG: incoming_http_average
+#  TAG: incoming_dns_average
+#  TAG: min_icp_poll_cnt
+#  TAG: min_dns_poll_cnt
+#  TAG: min_http_poll_cnt
+# Default:
+# incoming_icp_average 6
+# incoming_http_average 4
+# incoming_dns_average 4
+# min_icp_poll_cnt 8
+# min_dns_poll_cnt 8
+# min_http_poll_cnt 8
+#  TAG: accept_filter
+# Default: none
+#  TAG: client_ip_max_connections
+# Default: client_ip_max_connections -1
+#  TAG: tcp_recv_bufsize	(bytes)
+# Default: tcp_recv_bufsize 0 bytes
+
+# ICAP OPTIONS
+# -----------------------------------------------------------------------------
+#  TAG: icap_enable	on|off
+# Default: icap_enable off
+#  TAG: icap_connect_timeout
+# Default: none
+#  TAG: icap_io_timeout	time-units
+# Default: none
+#  TAG: icap_service_failure_limit
+# Default: icap_service_failure_limit 10
+#  TAG: icap_service_revival_delay
+# Default: icap_service_revival_delay 180
+#  TAG: icap_preview_enable	on|off
+# Default: icap_preview_enable on
+#  TAG: icap_preview_size
+# Default: icap_preview_size -1
+#  TAG: icap_default_options_ttl
+# Default: icap_default_options_ttl 60
+#  TAG: icap_persistent_connections	on|off
+# Default: icap_persistent_connections on
+#  TAG: icap_send_client_ip	on|off
+# Default: icap_send_client_ip off
+#  TAG: icap_send_client_username	on|off
+# Default: icap_send_client_username off
+#  TAG: icap_client_username_header
+# Default: icap_client_username_header X-Client-Username
+#  TAG: icap_client_username_encode	on|off
+# Default: icap_client_username_encode off
+#  TAG: icap_service
+# Default: none
+#  TAG: icap_class
+# Default: none
+#  TAG: icap_access
+# Default: none
+
+# eCAP OPTIONS
+# -----------------------------------------------------------------------------
+#  TAG: ecap_enable	on|off
+# Default: ecap_enable off
+#  TAG: ecap_service
+# Default: none
+#  TAG: loadable_modules
+# Default: none
+
+# MESSAGE ADAPTATION OPTIONS
+# -----------------------------------------------------------------------------
+#  TAG: adaptation_service_set
+# Default: none
+#  TAG: adaptation_service_chain
+# Default: none
+#  TAG: adaptation_access
+# Default: none
+#  TAG: adaptation_service_iteration_limit
+# Default: adaptation_service_iteration_limit 16
+#  TAG: adaptation_masterx_shared_names
+# Default: none
+#  TAG: icap_retry
+# Default: icap_retry deny all
+#  TAG: icap_retry_limit
+# Default: icap_retry_limit 0
+
+# DNS OPTIONS
+# -----------------------------------------------------------------------------
+#  TAG: check_hostnames
+# Default: check_hostnames off
+#  TAG: allow_underscore
+# Default: allow_underscore on
+#  TAG: cache_dns_program
+# Default: cache_dns_program /usr/lib64/squid/dnsserver
+#  TAG: dns_children
+# Default: dns_children 5
+#  TAG: dns_retransmit_interval
+# Default: dns_retransmit_interval 5 seconds
+#  TAG: dns_timeout
+# Default: dns_timeout 2 minutes
+#  TAG: dns_defnames	on|off
+# Default: dns_defnames off
+
+#  TAG: dns_nameservers
+# Default: none
+
+## ADD MORE ##
+<% if @dns_nameservers != "none" -%>
+dns_nameservers <%= @dns_nameservers %>
+<% end -%>
+
+#  TAG: hosts_file
+# Default: hosts_file /etc/hosts
+#  TAG: append_domain
+# Default: none
+#  TAG: ignore_unknown_nameservers
+# Default: ignore_unknown_nameservers on
+#  TAG: dns_v4_fallback
+# Default: dns_v4_fallback on
+#  TAG: ipcache_size	(number of entries)
+#  TAG: ipcache_low	(percent)
+#  TAG: ipcache_high	(percent)
+# Default: ipcache_size 1024
+# Default: ipcache_low 90
+# Default: ipcache_high 95
+#  TAG: fqdncache_size	(number of entries)
+# Default: fqdncache_size 1024
+
+# MISCELLANEOUS
+# -----------------------------------------------------------------------------
+#  TAG: memory_pools	on|off
+# Default: memory_pools on
+
+#  TAG: memory_pools_limit	(bytes)
+# Default: memory_pools_limit 5 MB
+
+## ADD MORE ##
+<% if @memory_pools_limit != "5 MB" -%>
+memory_pools_limit <%= @memory_pools_limit %>
+<% end -%>
+
+#  TAG: forwarded_for	on|off|transparent|truncate|delete
+# Default: forwarded_for on
+
+## ADD MORE ##
+<% if @forwarded_for != "on" -%>
+forwarded_for <%= @forwarded_for %>
+<% end -%>
+
+#  TAG: cachemgr_passwd
+# Default: none
+#  TAG: client_db	on|off
+# Default: client_db on
+#  TAG: refresh_all_ims	on|off
+# Default: refresh_all_ims off
+#  TAG: reload_into_ims	on|off
+# Default: reload_into_ims off
+#  TAG: maximum_single_addr_tries
+# Default: maximum_single_addr_tries 1
+#  TAG: retry_on_error
+# Default: retry_on_error off
+#  TAG: as_whois_server
+# Default: as_whois_server whois.ra.net
+#  TAG: offline_mode
+# Default: offline_mode off
+#  TAG: uri_whitespace
+# Default: uri_whitespace strip
+#  TAG: chroot
+# Default: none
+#  TAG: balance_on_multiple_ip
+# Default: balance_on_multiple_ip off
+#  TAG: pipeline_prefetch
+# Default: pipeline_prefetch off
+#  TAG: high_response_time_warning	(msec)
+# Default: high_response_time_warning 0
+#  TAG: high_page_fault_warning
+# Default: high_page_fault_warning 0
+#  TAG: high_memory_warning
+# Default: high_memory_warning 0 KB
+#  TAG: sleep_after_fork	(microseconds)
+# Default: sleep_after_fork 0
+#  TAG: windows_ipaddrchangemonitor	on|off
+# Default: windows_ipaddrchangemonitor on
+#  TAG: max_filedescriptors
+# Default: max_filedescriptors 0

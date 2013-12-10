@@ -40,7 +40,9 @@ class squid3 (
   $client_persistent_connections = 'on',
   $server_persistent_connections = 'on',
   $maximum_object_size           = '4096 KB',
-  $maximum_object_size_in_memory = '512 KB'
+  $maximum_object_size_in_memory = '512 KB',
+  $strip_query_terms    = 'on',
+  $memory_pools_limit   = '5 MB',
 ) inherits ::squid3::params {
 
   package { $package_name: ensure => installed }
