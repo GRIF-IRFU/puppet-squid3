@@ -12,9 +12,9 @@
     "LICENSE": "63f96c99cc44c3d16af914ff2568e0a4",
     "Modulefile": "ec24d25816cf56e9001dc3752264717f",
     "README.md": "006d369a077388aaa27b8238c96ad49f",
-    "manifests\\init.pp": "ce0256cc7771153c804ffe3688d36ef0",
+    "manifests\\init.pp": "d65bf658c120146e98d2f912cd4f9165",
     "manifests\\params.pp": "60dd77442c855a71931cc19ad150f0b4",
-    "templates\\cleansquid.conf.erb": "b1fb380e6d5c7991ba5db509075c5025",
+    "templates\\cleansquid.conf.erb": "9305662e4c6418651fdc962a8b62fccd",
     "templates\\squid.conf.documented": "077f10da57dfe168b5a4bea512799907",
     "templates\\squid.conf.erb": "0d24f61afa25616644353176d93eec88"
   },

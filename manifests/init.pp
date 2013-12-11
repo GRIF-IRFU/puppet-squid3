@@ -32,6 +32,7 @@ class squid3 (
   $tcp_outgoing_address = [],
   $cache_mem            = '256 MB',
   $cache_dir            = [],
+  $cache_dir_name       = '/var/spool/squid',
   $cache                = [],
   $via                  = 'on',
   $ignore_expect_100    = 'off',
@@ -41,13 +42,29 @@ class squid3 (
   $server_persistent_connections = 'on',
   $maximum_object_size           = '4096 KB',
   $maximum_object_size_in_memory = '512 KB',
+  $memory_replacement_policy = 'lru',
+  $cache_replacement_policy  = 'lru',
   $strip_query_terms    = 'on',
+  $snmp_port = '0',
+  $snmp_access ='deny all',
+  $dns_nameservers = 'none',
   $memory_pools_limit   = '5 MB',
-  $template_name        = 'squid3/squid.conf.erb',
+  $coredump_dir   = 'none',
+  $template_name        = 'squid.conf.erb',
 ) inherits ::squid3::params {
 
-  package { $package_name: ensure => installed }
-
+  file { $cache_dir_name :
+    ensure => directory,
+    mode => 644,
+    owner => 'squid',
+    group => 'squid',
+    require => Package[$package_name]
+  }
+  
+  package { $package_name: 
+    ensure => installed, 
+  }
+  
   service { $service_name:
     enable    => true,
     ensure    => running,
@@ -60,7 +77,7 @@ class squid3 (
   file { $config_file:
     require => Package[$package_name],
     notify  => Service[$service_name],
-    content => template($template_name),
+    content => template("squid3/${template_name}"),
   }
 
 }

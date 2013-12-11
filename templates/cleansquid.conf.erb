@@ -195,7 +195,7 @@ maximum_object_size_in_memory <%= @maximum_object_size_in_memory %>
 # Default: memory_replacement_policy lru
 
 ## ADD MORE ##
-<% @memory_replacement_policy.each do |line| -%>
+<% if @memory_replacement_policy != "lru" -%>
 memory_replacement_policy <%= @memory_replacement_policy %>
 <% end -%>
 
@@ -205,7 +205,7 @@ memory_replacement_policy <%= @memory_replacement_policy %>
 # Default: cache_replacement_policy lru
 
 ## ADD MORE ##
-<% @cache_replacement_policy.each do |line| -%>
+<% if @cache_replacement_policy != "lru" -%>
 cache_replacement_policy <%= @cache_replacement_policy %>
 <% end -%>
 
@@ -322,8 +322,8 @@ cache_log <%= @cache_log %>
 # Leave coredumps in the first cache dir
 
 ## ADD MORE ##
-<% if @cache_dir[0] != "none" -%>
-coredump_dir <%= cache_dir[0] %>
+<% if @coredump_dir != "none" -%>
+coredump_dir <%= coredump_dir %>
 <% end -%>
 
 # OPTIONS FOR FTP GATEWAYING
