@@ -43,6 +43,7 @@ class squid3 (
   $maximum_object_size_in_memory = '512 KB',
   $strip_query_terms    = 'on',
   $memory_pools_limit   = '5 MB',
+  $template_name        = 'squid3/squid.conf.erb',
 ) inherits ::squid3::params {
 
   package { $package_name: ensure => installed }
@@ -59,7 +60,7 @@ class squid3 (
   file { $config_file:
     require => Package[$package_name],
     notify  => Service[$service_name],
-    content => template('squid3/squid.conf.erb'),
+    content => template($template_name),
   }
 
 }
