@@ -108,7 +108,7 @@ class squid3 (
           "/sbin/service $service_name stop 
           for i in $cache_dirs_bash ; do rm -rf \$i/{0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F}{0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F} ; done
           for i in $cache_dirs_bash ; do rm -rf \$i/squid* ; done
-          for i in $cache_dirs_bash ; do mkdir -p \$i/squid{0..${squid_number}} ; done",
+          for i in $cache_dirs_bash ; do mkdir -p \$i/squid{0..${squid_number}} ; chown ${user}:${user} \$i/squid* ;  done",
           
          refreshonly=>true,
          notify=>Service[$service_name],
