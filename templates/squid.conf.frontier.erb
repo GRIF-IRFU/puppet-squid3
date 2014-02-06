@@ -1,0 +1,125 @@
+acl NET_LOCAL src 0.0.0.0/32
+acl HOST_MONITOR src 127.0.0.1/32 128.142.0.0/16 188.185.0.0/17 131.225.240.232/32
+acl snmppublic snmp_community public
+acl all src all
+acl manager proto cache_object
+acl localhost src 127.0.0.1/32
+acl to_localhost dst 127.0.0.0/8 0.0.0.0/32
+acl localnet src 10.0.0.0/8     # RFC1918 possible internal network
+acl localnet src 172.16.0.0/12  # RFC1918 possible internal network
+acl localnet src 192.168.0.0/16 # RFC1918 possible internal network
+acl SSL_ports port 443
+acl Safe_ports port 80          # http
+acl Safe_ports port 21          # ftp
+acl Safe_ports port 443         # https
+acl Safe_ports port 70          # gopher
+acl Safe_ports port 210         # wais
+acl Safe_ports port 1025-65535  # unregistered ports
+acl Safe_ports port 280         # http-mgmt
+acl Safe_ports port 488         # gss-http
+acl Safe_ports port 591         # filemaker
+acl Safe_ports port 777         # multiling http
+acl CONNECT method CONNECT
+
+## ADD MORE ACLs ##
+<% @acl.sort.each do |line| -%>
+acl <%= line %>
+<% end -%>
+
+http_access allow manager localhost
+http_access deny manager
+http_access deny !Safe_ports
+http_access deny CONNECT !SSL_ports
+http_access allow NET_LOCAL
+http_access allow localhost
+## ADD MORE access rules ##
+<% @http_access.sort.each do |line| -%>
+http_access <%= line %>
+<% end -%>
+http_access deny all
+
+icp_access allow localnet
+## ADD MORE icp access rules ##
+<% @icp_access.sort.each do |line| -%>
+icp_access <%= line %>
+<% end -%>
+icp_access deny all
+
+http_port 3128
+## ADD MORE ports ##
+<% @http_port.sort.each do |line| -%>
+http_port <%= line %>
+<% end -%>
+
+hierarchy_stoplist cgi-bin
+
+cache_mem <%= @cache_mem %>
+
+maximum_object_size_in_memory <%= @maximum_object_size_in_memory %>
+maximum_object_size <%= @maximum_object_size %>
+
+<% @cache_dir.each do |line| -%>
+cache_dir <%= line %>
+<% end -%>
+
+logformat awstats %>a %ui %un [%{%d/%b/%Y:%H:%M:%S +0000}tl] "%rm %ru HTTP/%rv" %Hs %<st %Ss:%Sh %tr "%{X-Frontier-Id}>h" "%{Referer}>h" "%{User-Agent}>h"
+access_log /var/log/squid/access.log <%= @logformat %>
+logfile_daemon /usr/libexec/squid/logfile-daemon
+cache_log /var/log/squid/cache.log
+cache_store_log none
+mime_table /etc/squid/mime.conf
+pid_filename /var/run/squid/squid.pid
+strip_query_terms <%= @strip_query_terms %>
+unlinkd_program /usr/libexec/squid/unlinkd
+refresh_pattern ^ftp:           1440    20%     10080
+refresh_pattern ^gopher:        1440    0%      1440
+refresh_pattern -i /cgi-bin/    0       0%      0
+refresh_pattern .               0       20%     4320
+negative_ttl 1 minute
+acl shoutcast rep_header X-HTTP09-First-Line ^ICY.[0-9]
+upgrade_http0.9 deny shoutcast
+acl apache rep_header Server ^Apache
+broken_vary_encoding allow apache
+  collapsed_forwarding on
+
+cache_mgr <%= @cache_mgr %>
+cache_effective_user <%= @user %>
+cache_effective_group <%= @user %>
+
+#cache tuning
+<% @cache.sort.each do |line| -%>
+cache <%= line %>
+<% end -%>
+umask 022
+
+<% if @client_persistent_connections != 'on' -%>
+client_persistent_connections <%= @client_persistent_connections %>
+<% end -%>
+<% if @server_persistent_connections != 'on' -%>
+server_persistent_connections <%= @server_persistent_connections %>
+<% end -%>
+
+
+#set snmp port and enable/disalbe (if port 0) 
+snmp_port  <%= @snmp_port %>
+
+#add user defined snmp ACLs first
+<% @snmp_access.sort.each do |line| -%>
+snmp_access  <%= line %>
+<% end -%>
+snmp_access allow snmppublic HOST_MONITOR
+snmp_access deny all
+icp_port 0
+icon_directory /usr/share/squid/icons
+error_directory /usr/share/squid/errors/English
+ignore_ims_on_miss on
+<% if @coredump_dir != "none" -%>
+coredump_dir <%= coredump_dir %>
+<% end -%>
+
+<% if @dns_nameservers != "none" -%>
+dns_nameservers <%= @dns_nameservers %>
+<% end -%>
+<% if @memory_pools_limit != "5 MB" -%>
+memory_pools_limit <%= @memory_pools_limit %>
+<% end -%>

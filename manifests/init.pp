@@ -36,7 +36,7 @@ class squid3 (
   $cache                = [],
   $via                  = 'on',
   $ignore_expect_100    = 'off',
-  $cache_mgr            = 'root',
+  $cache_mgr            = 'root', #the manager email
   $forwarded_for        = 'on',
   $client_persistent_connections = 'on',
   $server_persistent_connections = 'on',
@@ -44,13 +44,15 @@ class squid3 (
   $maximum_object_size_in_memory = '512 KB',
   $memory_replacement_policy = 'lru',
   $cache_replacement_policy  = 'lru',
-  $strip_query_terms    = 'on',
-  $snmp_port = '0',
+  $strip_query_terms    = 'on', #or off
+  $snmp_port = '0', #use 3401 for enableing and using default port
   $snmp_access ='deny all',
   $dns_nameservers = 'none',
   $memory_pools_limit   = '5 MB',
   $coredump_dir   = 'none',
   $template_name        = 'squid.conf.erb',
+  $frontier_template_name = 'squid.conf.frontier.erb',
+  $logformat = 'squid', #can be any format defined in the erb, such as awstats
   
 ) inherits ::squid3::params {
 
@@ -78,7 +80,7 @@ class squid3 (
   file { $config_file:
     require => Package[$package_name],
     notify  => Service[$service_name],
-    content => template("squid3/${template_name}"),
+    content => $variant ? { /frontier/ => template("squid3/${frontier_template_name}"), default => template("squid3/${template_name}") },
   }
 
 }
