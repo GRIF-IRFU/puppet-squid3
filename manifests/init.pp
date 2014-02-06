@@ -51,14 +51,15 @@ class squid3 (
   $memory_pools_limit   = '5 MB',
   $coredump_dir   = 'none',
   $template_name        = 'squid.conf.erb',
+  
 ) inherits ::squid3::params {
 
   file { $cache_dir_name :
     ensure => directory,
     mode => 644,
-    owner => 'squid',
-    group => 'squid',
-    require => Package[$package_name]
+    owner => $user,
+    group => $user,
+    require => Package[$package_name],
   }
   
   package { $package_name: 

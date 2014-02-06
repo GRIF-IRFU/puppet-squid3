@@ -1,7 +1,8 @@
 # Class: squid3::params
 #
 class squid3::params(
-  $variant=squid #this can be frontier on RHEL.
+  $variant='squid', #this can be frontier on RHEL.
+  $user='squid',    #the username that will run the squid server, and own the files
 ) {
 
   $prefix=$variant ? { /frontier/ => 'frontier-', default => '' }
