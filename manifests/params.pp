@@ -1,15 +1,18 @@
 # Class: squid3::params
 #
-class squid3::params {
+class squid3::params(
+  $variant=squid #this can be frontier on RHEL.
+) {
 
+  $prefix=$variant ? { /frontier/ => 'frontier-', default => '' }
   case $::osfamily {
     'RedHat': {
       if $::operatingsystemrelease < 6 {
-        $package_name = 'squid3'
+        $package_name = $variant ? { /frontier/ => 'frontier-squid', default => 'squid3' }
       } else {
-        $package_name = 'squid'
+        $package_name = "${prefix}squid"
       }
-      $service_name = 'squid'
+      $service_name = "${prefix}squid"
       $config_file = '/etc/squid/squid.conf'
       $log_directory = '/var/log/squid'
     }
