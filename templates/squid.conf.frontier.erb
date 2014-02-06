@@ -33,21 +33,21 @@ http_access deny CONNECT !SSL_ports
 http_access allow NET_LOCAL
 http_access allow localhost
 ## ADD MORE access rules ##
-<% @http_access.sort.each do |line| -%>
+<% @http_access.each do |line| -%>
 http_access <%= line %>
 <% end -%>
 http_access deny all
 
 icp_access allow localnet
 ## ADD MORE icp access rules ##
-<% @icp_access.sort.each do |line| -%>
+<% @icp_access.each do |line| -%>
 icp_access <%= line %>
 <% end -%>
 icp_access deny all
 
 http_port 3128
 ## ADD MORE ports ##
-<% @http_port.sort.each do |line| -%>
+<% @http_port.each do |line| -%>
 http_port <%= line %>
 <% end -%>
 
@@ -87,7 +87,7 @@ cache_effective_user <%= @user %>
 cache_effective_group <%= @user %>
 
 #cache tuning
-<% @cache.sort.each do |line| -%>
+<% @cache.each do |line| -%>
 cache <%= line %>
 <% end -%>
 umask 022
@@ -104,7 +104,7 @@ server_persistent_connections <%= @server_persistent_connections %>
 snmp_port  <%= @snmp_port %>
 
 #add user defined snmp ACLs first
-<% @snmp_access.sort.each do |line| -%>
+<% @snmp_access.each do |line| -%>
 snmp_access  <%= line %>
 <% end -%>
 snmp_access allow snmppublic HOST_MONITOR
