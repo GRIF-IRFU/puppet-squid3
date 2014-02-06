@@ -98,7 +98,7 @@ class squid3 (
       
     if($nthreads>1) {
        #create a state file that tells us how many squid threads we have, and that will triger a one-time cleanup
-       $cache_dirs_bash=inline_template('@$cache_dir_paths.map{|k| "\'" + k + "\'"}.join(" ")') #this are bash escaped directories
+       $cache_dirs_bash=inline_template('<%= @cache_dir_paths.map{|k| "\'" + k + "\'"}.join(" ") %>') #this are bash escaped directories
        $squid_number=$nthreads - 1
        
        file { '/var/lib/puppet/state/nthreads.txt': ensure=>present, content => "File created by puppet-squid3. Do *NOT* remove.\nnthreads : $nthreads\n"}
