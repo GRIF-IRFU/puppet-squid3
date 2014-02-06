@@ -87,6 +87,13 @@ class squid3 (
   }
 
   if($variant == 'frontier') {
+    
+    #prevent standard squid/frontier collision :
+    package{[squid,squid3] : 
+      ensure=>absent,
+      before=>Package[$package_name],
+    }
+    
     #disable automatic customization "à la CERN"
     file { '/etc/squid/customize.sh': 
       source => 'puppet:///modules/squid3/customize.sh',
