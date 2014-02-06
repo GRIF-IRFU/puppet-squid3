@@ -83,5 +83,15 @@ class squid3 (
     content => $variant ? { /frontier/ => template("squid3/${frontier_template_name}"), default => template("squid3/${template_name}") },
   }
 
+  if($variant == 'frontier') {
+    #disable automatic customization "à la CERN"
+    file { '/etc/squid/customize.sh': 
+      source => 'puppet:///modules/squid3/customize.sh',
+      mode=>755,
+      require=>Package[$package_name],
+      before=> Service[$service_name],
+      }
+  }
+
 }
 
