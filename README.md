@@ -7,6 +7,9 @@ configuration file options.
 
 * `squid3` : Main class for the Squid 3 http proxy server.
 
+This module has been modified by IRFU in order to add more parameters, and to be able to setup a CERN frontier squid server on RHEL.
+It also includes the necessary yum repo, and allows for choosing the number of parrallel threads frontier will run with.
+
 ## Examples
 
 Basic memory caching proxy server :
