@@ -86,7 +86,13 @@ class squid3 (
     content => $variant ? { /frontier/ => template("squid3/${frontier_template_name}"), default => template("squid3/${template_name}") },
   }
 
-  if($variant == 'frontier') {
+  if($variant == 'frontier' and $::osfamily!='RedHat') {
+    notify{'frontier cannot be installed on non-RHEL hosts ! Please check your squid3 (varian) params.': loglevel=>warning}
+  }
+  
+  if($variant == 'frontier' and $::osfamily=='RedHat') {
+    #frontier is not in RHEL repos.
+    include squid3::repository::frontier
     
     #prevent standard squid/frontier collision :
     package{[squid,squid3] : 
