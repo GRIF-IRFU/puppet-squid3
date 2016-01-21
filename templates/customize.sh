@@ -18,4 +18,4 @@
 # }'
 
 #just print the puppet modified file
-cat
+cat <%= @config_file %>.puppet
