@@ -1,42 +1,23 @@
 # Class: squid3
 #
-# Squid 3.x proxy server.
-#
-# Sample Usage :
-#     include squid3
-#
-#     class { 'squid3':
-#       acl => [
-#         'de myip 192.168.1.1',
-#         'fr myip 192.168.1.2',
-#         'office src 10.0.0.0/24',
-#       ],
-#       http_access => [
-#         'allow office',
-#       ],
-#       cache => [ 'deny all' ],
-#       via => 'off',
-#       tcp_outgoing_address => [
-#         '192.168.1.1 country_de',
-#         '192.168.1.2 country_fr',
-#       ],
-#       server_persistent_connections => 'off',
-#     }
-#
 class squid3 (
   # Options are in the same order they appear in squid.conf
-  $http_port            = [ '3128' ],
-  $acl                  = [],
-  $http_access          = [],
-  $icp_access           = [],
-  $tcp_outgoing_address = [],
-  $cache_mem            = '256 MB',
-  $cache_dir            = ['ufs /var/cache/squid 20000 16 256'],
-  $cache                = [],
-  $via                  = 'on',
-  $ignore_expect_100    = 'off',
-  $cache_mgr            = 'root', #the manager email
-  $forwarded_for        = 'on',
+$use_deprecated_opts           = true,
+  $http_port                     = [ '3128' ],
+  $https_port                    = [],
+  $acl                           = [],
+  $ssl_ports                     = [ '443' ],
+  $safe_ports                    = [ '80', '21', '443', '70', '210', '1025-65535', '280', '488', '591', '777', ],
+  $http_access                   = [],
+  $icp_access                    = [],
+  $tcp_outgoing_address          = [],
+  $cache_mem                     = '256 MB',
+  $cache_dir                     = [],
+  $cache                         = [],
+  $via                           = 'on',
+  $ignore_expect_100             = 'off',
+  $cache_mgr                     = 'root',
+  $forwarded_for                 = 'on',
   $client_persistent_connections = 'on',
   $server_persistent_connections = 'on',
   $maximum_object_size           = '4096 KB',
@@ -51,9 +32,18 @@ class squid3 (
   $coredump_dir   = 'none',
   $template_name        = 'squid.conf.erb',
   $frontier_template_name = 'squid.conf.frontier.erb',
+  $user=$::squid3::params::user,
+  $variant = $::squid3::params::variant,
   $logformat = 'squid', #can be any format defined in the erb, such as awstats
   $nthreads=1, #this is ONLY available for frontier, and will run multiple threads on the same host. Warning, this will clear the cache.
-  
+  $config_hash                   = {},
+  $refresh_patterns              = [],
+  $template                      = 'long',
+  $package_version               = 'installed',
+  $package_name                  = $::squid3::params::package_name,
+  $service_ensure                = 'running',
+  $service_enable                = $::squid3::params::service_enable,
+  $service_name                  = $::squid3::params::service_name,
 ) inherits ::squid3::params {
 
   $cache_dir_paths_1=regsubst($cache_dir,'([a-z]+ +)(.*)','\2')
@@ -61,30 +51,45 @@ class squid3 (
   #if we're wrong in the regex, this might thown a puppet error : Could not intern from text/pson
   file { $cache_dir_paths :
     ensure => directory,
-    mode => 644,
+    mode => '0644',
     owner => $user,
     group => $user,
-    require => Package[$package_name],
+    require => Package['squid3_package'],
   }
   
-  package { $package_name: 
-    ensure => installed, 
-  }
-  
-  service { $service_name:
-    enable    => true,
-    ensure    => running,
-    restart   => "service ${service_name} reload",
-    path      => ['/sbin', '/usr/sbin'],
-    hasstatus => true,
-    require   => Package[$package_name],
+  $use_template = $template ? {
+    'short' => 'squid3/squid.conf.short.erb',
+    'long'  => 'squid3/squid.conf.long.erb',
+    default => $template,
   }
 
-  file { $config_file:
-    require => Package[$package_name],
-    notify  => Service[$service_name],
+  if ! empty($config_hash) and $use_template == 'long' {
+    fail('$config_hash does not (yet) work with the "long" template!')
+  }
+
+  package { 'squid3_package':
+    ensure => $package_version,
+    name   => $package_name,
+  }
+
+  service { 'squid3_service':
+    ensure    => $service_ensure,
+    enable    => $service_enable,
+    name      => $service_name,
+   restart   => "service ${service_name} reload",
+    path      => [ '/sbin', '/usr/sbin', '/usr/local/etc/rc.d' ],
+    hasstatus => true,
+    require   => Package['squid3_package'],
+  }
+
+  #the .puppet config file will have the same contents as the real config, and will be dumped by the customize script
+  file { [$config_file,"${config_file}.puppet"]:
+    require      => Package['squid3_package'],
+    notify       => Service['squid3_service'],
     content => $variant ? { /frontier/ => template("squid3/${frontier_template_name}"), default => template("squid3/${template_name}") },
-    mode => $variant ? { /frontier/ => 440 , default => 644 },
+    mode => $variant ? { /frontier/ =>'0444', default => '0644'} ,
+    validate_cmd => $variant ? { /frontier/ => "/bin/true" , default => "/usr/sbin/${service_name} -k parse -f %" },
+    owner => $variant ? { /frontier/ => $user , default => 'root' },
   }
 
   if($variant == 'frontier') {
@@ -92,18 +97,18 @@ class squid3 (
     include squid3::repository::frontier
     
     #prevent standard squid/frontier collision :
-    package{[squid,squid3] : 
+    package{['squid','squid3'] : 
       ensure=>absent,
-      before=>Package[$package_name],
+      before=>Package['squid3_package']
     }
     
     #disable automatic customization "à la CERN"
     file { '/etc/squid/customize.sh': 
-      source => 'puppet:///modules/squid3/customize.sh',
-      mode=>755,
-      require=>Package[$package_name],
-      before=> Service[$service_name],
-      }
+      content => template('squid3/customize.sh'),
+      mode=>'0755',
+      require=>Package['squid3_package'],
+      before=> [Service['squid3_service'],File[$config_file]],
+    }
       
       
     if($nthreads>1) {
@@ -121,14 +126,12 @@ class squid3 (
           for i in $cache_dirs_bash ; do mkdir -p \$i/squid{0..${squid_number}} ; chown ${user}:${user} \$i/squid* ;  done",
           
          refreshonly=>true,
-         notify=>Service[$service_name],
+         notify=>Service['squid3_service'],
          require=>File[$config_file],
-         before=>Service[$service_name],
+         before=>Service['squid3_service'],
          path => ['/usr/bin','/usr/sbin','/bin','/sbin',],
          logoutput => on_failure,
        }
     }
   }
-
 }
-

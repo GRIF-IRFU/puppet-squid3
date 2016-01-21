@@ -1,22 +1,45 @@
 {
   "name": "thias-squid3",
+  "version": "1.0.0",
   "author": "Matthias Saou",
-  "description": "Install, enable and configure a Squid 3 http proxy server.",
-  "license": "Apache 2.0",
-  "project_page": "https://github.com/thias/puppet-squid3",
-  "source": "git://github.com/thias/puppet-squid3",
+  "license": "Apache-2.0",
   "summary": "Squid 3 http proxy server module",
-  "version": "0.2.0",
-  "checksums": {
-    "ChangeLog": "04e63c3bc7030110b3bcdef98cd11b05",
-    "LICENSE": "63f96c99cc44c3d16af914ff2568e0a4",
-    "Modulefile": "ec24d25816cf56e9001dc3752264717f",
-    "README.md": "006d369a077388aaa27b8238c96ad49f",
-    "manifests\\init.pp": "d65bf658c120146e98d2f912cd4f9165",
-    "manifests\\params.pp": "60dd77442c855a71931cc19ad150f0b4",
-    "templates\\cleansquid.conf.erb": "9305662e4c6418651fdc962a8b62fccd",
-    "templates\\squid.conf.documented": "077f10da57dfe168b5a4bea512799907",
-    "templates\\squid.conf.erb": "0d24f61afa25616644353176d93eec88"
-  },
-  "dependencies": []
+  "source": "git://github.com/thias/puppet-squid3",
+  "project_page": "https://github.com/thias/puppet-squid3",
+  "issues_url": "https://github.com/thias/puppet-squid3/issues",
+  "tags": [ "squid", "proxy" ],
+  "operatingsystem_support": [
+    {
+    "operatingsystem": "RedHat",
+    "operatingsystemrelease": [ "5", "6", "7" ]
+    },
+    {
+    "operatingsystem": "CentOS",
+    "operatingsystemrelease": [ "5", "6", "7" ]
+    },
+    {
+    "operatingsystem": "Debian",
+    "operatingsystemrelease": [ "6", "7", "8" ]
+    },
+    {
+    "operatingsystem": "Ubuntu",
+    "operatingsystemrelease": [ "12", "14" ]
+    }
+  ],
+  "requirements": [
+    {
+    "name": "pe",
+    "version_requirement": "3.x"
+    },
+    {
+    "name": "puppet",
+    "version_requirement": ">=2.7.20 <4.1.0"
+    }
+  ],
+  "dependencies": [
+    {
+    "name": "puppetlabs/stdlib",
+    "version_requirement": ">= 2.4.0"
+    }
+  ]
 }

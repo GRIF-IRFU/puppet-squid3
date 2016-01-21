@@ -114,7 +114,7 @@ icon_directory /usr/share/squid/icons
 error_directory /usr/share/squid/errors/English
 ignore_ims_on_miss on
 <% if @coredump_dir != "none" -%>
-coredump_dir <%= coredump_dir %>
+coredump_dir <%= @coredump_dir %>
 <% end -%>
 
 <% if @dns_nameservers != "none" -%>

@@ -639,9 +639,11 @@
 #
 # Recommended minimum configuration:
 #
+<% if @use_deprecated_opts -%>
 acl manager proto cache_object
 acl localhost src 127.0.0.1/32 ::1
 acl to_localhost dst 127.0.0.0/8 0.0.0.0/32 ::1
+<% end -%>
 
 # Example rule allowing access from your local networks.
 # Adapt to list your (internal) IP networks from where browsing
@@ -652,17 +654,12 @@ acl localnet src 192.168.0.0/16	# RFC1918 possible internal network
 acl localnet src fc00::/7       # RFC 4193 local private network range
 acl localnet src fe80::/10      # RFC 4291 link-local (directly plugged) machines
 
-acl SSL_ports port 443
-acl Safe_ports port 80		# http
-acl Safe_ports port 21		# ftp
-acl Safe_ports port 443		# https
-acl Safe_ports port 70		# gopher
-acl Safe_ports port 210		# wais
-acl Safe_ports port 1025-65535	# unregistered ports
-acl Safe_ports port 280		# http-mgmt
-acl Safe_ports port 488		# gss-http
-acl Safe_ports port 591		# filemaker
-acl Safe_ports port 777		# multiling http
+<% @ssl_ports.each do |line| -%>
+acl SSL_ports port <%= line %>
+<% end -%>
+<% @safe_ports.each do |line| -%>
+acl Safe_ports port <%= line %>
+<% end -%>
 acl CONNECT method CONNECT
 
 #  TAG: follow_x_forwarded_for
@@ -1186,6 +1183,11 @@ http_port <%= line %>
 #
 #Default:
 # none
+<% if @https_port -%>
+<% @https_port.each do |line| -%>
+https_port <%= line %>
+<% end -%>
+<% end -%>
 
 #  TAG: tcp_outgoing_tos
 #	Allows you to select a TOS/Diffserv value to mark outgoing
@@ -2624,7 +2626,7 @@ cache_log <%= @cache_log %>
 #
 
 # Leave coredumps in the first cache dir
-coredump_dir /var/spool/squid
+coredump_dir <%= @coredump_dir %>
 
 # OPTIONS FOR FTP GATEWAYING
 # -----------------------------------------------------------------------------

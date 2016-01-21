@@ -14,25 +14,39 @@ It also includes the necessary yum repo, and allows for choosing the number of p
 
 Basic memory caching proxy server :
 
-    include squid3
+```puppet
+include squid3
+```
 
 Non-caching multi-homed proxy server :
 
-    class { 'squid3':
-      acl => [
-        'de myip 192.168.1.1',
-        'fr myip 192.168.1.2',
-        'office src 10.0.0.0/24',
-      ],
-      http_access => [
-        'allow office',
-      ],
-      cache => [ 'deny all' ],
-      via => 'off',
-      tcp_outgoing_address => [
-        '192.168.1.1 country_de',
-        '192.168.1.2 country_fr',
-      ],
-      server_persistent_connections => 'off',
-    }
+```puppet
+class { '::squid3':
+  acl => [
+    'country_de myip 192.168.1.1',
+    'country_fr myip 192.168.1.2',
+    'office src 10.0.0.0/24',
+  ],
+  http_access => [
+    'allow office',
+  ],
+  cache => [ 'deny all' ],
+  via => 'off',
+  tcp_outgoing_address => [
+    '192.168.1.1 country_de',
+    '192.168.1.2 country_fr',
+  ],
+  server_persistent_connections => 'off',
+}
+```
+
+## Caveats
+
+Upgrading Squid3 from version 3.2 to 3.3 breaks the configuration file to fix :
+
+```puppet
+class { '::squid3':
+  use_deprecated_opts => false
+}
+```
 
